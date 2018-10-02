@@ -29,46 +29,73 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Todo> _todoItems = [];
 
-  void _markAsDone() {
-    setState(() {});
+  void markAsDone(Todo todo) {
+    setState(() {
+      _todoItems[todo.id] = new Todo(
+          id: todo.id,
+          title: todo.title,
+          description: todo.description,
+          isCompleted: true);
+    });
   }
 
   Widget _buildTodoItem(Todo todo) {
-    return new Card(
-        child: new Column(
-      children: <Widget>[
-        ListTile(title: Text(todo.title), subtitle: Text(todo.description)),
-        ButtonBar(
-          children: <Widget>[
-            FlatButton(
-              child: Text("Mark as completed"),
-              onPressed: _markAsDone,
-            )
-          ],
-        )
-      ],
-    ));
+    if (!todo.isCompleted) {
+      return new Card(
+          child: new Column(
+        children: <Widget>[
+          ListTile(title: Text(todo.title), subtitle: Text(todo.description)),
+          ButtonBar(
+            children: <Widget>[
+              FlatButton(
+                child: Text("Mark as done"),
+                onPressed: () => markAsDone(todo),
+              )
+            ],
+          )
+        ],
+      ));
+    } else {
+      return new Card(
+          child: new Column(
+        children: <Widget>[
+          ListTile(
+              title: Text(
+                todo.title,
+                style: TextStyle(
+                    color: Colors.grey, decoration: TextDecoration.lineThrough),
+              ),
+              subtitle: Text(
+                todo.description,
+                style: TextStyle(
+                    color: Colors.grey, decoration: TextDecoration.lineThrough),
+              )),
+          ButtonBar(
+            children: <Widget>[
+              FlatButton(
+                child: Text("Mark as completed"),
+                onPressed: null,
+              )
+            ],
+          )
+        ],
+      ));
+    }
   }
-
-  
 
   void _addTodoItem() {
     setState(() {
       int index = _todoItems.length;
-      _todoItems.add(
-          new Todo(id: index, title: "task", description: "description"));
+      _todoItems
+          .add(new Todo(id: index, title: "task", description: "description",isCompleted: false));
     });
   }
 
   Widget _buildTodoList() {
     return new ListView.builder(
+      itemCount: _todoItems.length,
       itemBuilder: (context, index) {
-        // itemBuilder will be automatically be called as many times as it takes for the
-        // list to fill up its available space, which is most likely more than the
-        // number of todo items we have. So, we need to check the index is OK.
-        if (index < _todoItems.length) {
-          return _buildTodoItem(_todoItems[index]);
-        }
+        return _buildTodoItem(_todoItems[index]);
       },
     );
   }

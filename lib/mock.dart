@@ -6,7 +6,7 @@ class Todo {
   final String title;
   final String description;
   final bool isCompleted;
-  const Todo({this.id,this.title,this.description,this.isCompleted=false});
+  const Todo({this.id,this.title,this.description,this.isCompleted});
 
 }
 
