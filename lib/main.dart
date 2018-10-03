@@ -7,21 +7,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
-
-    List<String> titles = ["Home","AddTodo"];
-    List<Todo> _todoItems = [];
-    GlobalKey<_MyHomePageState> mainKey = new GlobalKey();
-    List<GlobalKey> keys =[mainKey];
-    AppState state = new AppState(titles: titles,list: _todoItems,keys: keys);
-
-
     return new MaterialApp(
       title: 'Workshop TodoList',
       initialRoute: '/',
       routes: {
         // When we navigate to the "/" route, build the MyHomePage Widget
-        '/': (context) => MyHomePage(state: state)
+        '/': (context) => MyHomePage(title: "Todos")
       },
       theme: new ThemeData(
         primarySwatch: Colors.blue,
@@ -30,91 +21,100 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AddTodo extends StatefulWidget{
-
-  AddTodo({Key key, this.state}) : super(key: key);
-
-  final AppState state;
-
-  _AddTodo createState() => _AddTodo();
-
-}
-
-class _AddTodo extends State<AddTodo> {
-
-
-  Widget _build(BuildContext context) {
-    return new Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(),
-            TextField(),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                FlatButton(
-                  child: Text("Done"),
-                  onPressed: (){
-
-                      Todo t = new Todo(id:widget.state.list.length,title:"test",description: "test",isCompleted: false);
-                      MyHomePage.of(context).addTodoItem(t);
-                  },
-                ),
-                FlatButton(
-                  child: Text("Back"),
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        "/", (Route<dynamic> route) => false);
-                  },
-                )
-              ],
-            )
-          ],
-        ));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(
-          title: new Text("Add Todo"),
-        ),
-        body:
-        _build(context) // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
-
 class MyHomePage extends StatefulWidget {
+  static _MyHomePageState of(BuildContext context) =>
+      context.ancestorStateOfType(const TypeMatcher<_MyHomePageState>());
 
-  static _MyHomePageState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<_MyHomePageState>());
+  MyHomePage({Key key, this.title}) : super(key: key);
 
-  MyHomePage({Key key, this.state}) : super(key: key);
-
-  final AppState state;
+  final String title;
 
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-
-
-  List<Todo> _local;
+  final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  List<Todo> _current;
+  PersistentBottomSheetController<Null> _bottomSheet;
 
   @override
   void initState() {
     super.initState();
-    _local=widget.state.list;
+    _current = [];
+  }
 
+  void _add(String title, String description) {
+    setState(() {
+      Todo todo = new Todo(
+          id: _current.length,
+          title: title,
+          description: description,
+          isCompleted: false);
+      _current.add(todo);
+      _bottomSheet.close();
+    });
+  }
+
+  void _showConfigurationSheet() {
+    TextEditingController titleController = TextEditingController();
+    TextEditingController descrController = TextEditingController();
+
+    final PersistentBottomSheetController<Null> bottomSheet = _scaffoldKey
+        .currentState
+        .showBottomSheet((BuildContext bottomSheetContext) {
+      return Container(
+        height: 200.0,
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.black26)),
+        ),
+        child: ListView(
+          shrinkWrap: true,
+          primary: false,
+          padding: EdgeInsets.fromLTRB(16.0, 2.0, 16.0, 2.0),
+          children: <Widget>[
+            TextField(controller: titleController),
+            TextField(controller: descrController),
+            ButtonBar(
+              children: <Widget>[
+                FlatButton(
+                    child: Text(
+                      "Add Todo",
+                      style: TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      _add(titleController.text, descrController.text);
+                    })
+              ],
+            )
+          ],
+        ),
+      );
+    });
+
+    setState(() {
+      _bottomSheet = bottomSheet;
+    });
+
+    _bottomSheet.closed.whenComplete(() {
+      if (mounted) {
+        setState(() {
+          _bottomSheet = null;
+        });
+      }
+    });
+  }
+
+  void choiceAction(String choice) {
+    if (choice == MenuEntry.add) {
+      _showConfigurationSheet();
+    }
   }
 
   void markAsDone(Todo todo) {
     setState(() {
-      _local[todo.id] = new Todo(
+      _current[todo.id] = new Todo(
           id: todo.id,
           title: todo.title,
           description: todo.description,
@@ -166,44 +166,40 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
-
-  void addTodoItem(Todo todo) {
-
-     setState(() {
-
-       widget.state.list.add(todo);
-
-     });
-
-  }
-
   Widget _buildTodoList() {
     return new ListView.builder(
-      itemCount: _local.length,
-      itemBuilder: (context, index) {
-        return _buildTodoItem(widget.state.list[index]);
-      },
-    );
+        itemBuilder: (context, index) {
+          return _buildTodoItem(_current[index]);
+        },
+        itemCount: _current.length);
   }
 
   @override
   Widget build(BuildContext context) {
+    print("current lenght" + _current.length.toString());
+
     return new Scaffold(
+      key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text(widget.state.titles[0]),
+        title: new Text("Flutter BottomSheet"),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            onSelected: choiceAction,
+            itemBuilder: (BuildContext context) {
+              return MenuEntry.choices.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          )
+        ],
       ),
-      body: _buildTodoList(),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: (){Navigator.of(context)
-            .pushAndRemoveUntil(new MaterialPageRoute(
-            builder: (BuildContext context)=>new AddTodo(state:widget.state))
-            , (Route<dynamic> route) => false);},
-        tooltip: 'Refresh',
-        child: new Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: new Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: _buildTodoList(),
+      ),
     );
   }
-
-
 }

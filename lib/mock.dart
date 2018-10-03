@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class Todo {
@@ -9,16 +7,9 @@ class Todo {
   final bool isCompleted;
 
   const Todo({this.id, this.title, this.description, this.isCompleted});
-
 }
 
-class AppState {
-
-  final List<Todo> list;
-  final List<String> titles;
-  final List<GlobalKey> keys;
-  const AppState({this.list,this.titles,this.keys});
-
+class MenuEntry {
+  static const String add = 'Add Todo';
+  static const List<String> choices = <String>[add];
 }
-
-
