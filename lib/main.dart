@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'mock.dart';
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Workshop TodoList',
       initialRoute: '/',
       routes: {
         // When we navigate to the "/" route, build the MyHomePage Widget
         '/': (context) => MyHomePage(title: "Todos")
       },
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
     );
@@ -30,11 +30,11 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Todo> _current;
   PersistentBottomSheetController<Null> _bottomSheet;
 
@@ -46,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _add(String title, String description) {
     setState(() {
-      Todo todo = new Todo(
+      Todo todo = Todo(
           id: _current.length,
           title: title,
           description: description,
@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void markAsDone(Todo todo) {
     setState(() {
-      _current[todo.id] = new Todo(
+      _current[todo.id] = Todo(
           id: todo.id,
           title: todo.title,
           description: todo.description,
@@ -124,8 +124,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildTodoItem(Todo todo) {
     if (!todo.isCompleted) {
-      return new Card(
-          child: new Column(
+      return Card(
+          child: Column(
         children: <Widget>[
           ListTile(title: Text(todo.title), subtitle: Text(todo.description)),
           ButtonBar(
@@ -139,8 +139,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ));
     } else {
-      return new Card(
-          child: new Column(
+      return Card(
+          child: Column(
         children: <Widget>[
           ListTile(
               title: Text(
@@ -167,7 +167,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _buildTodoList() {
-    return new ListView.builder(
+    return ListView.builder(
         itemBuilder: (context, index) {
           return _buildTodoItem(_current[index]);
         },
@@ -178,10 +178,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     print("current lenght" + _current.length.toString());
 
-    return new Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
-        title: new Text("Flutter BottomSheet"),
+      appBar: AppBar(
+        title:  Text("Flutter BottomSheet"),
         actions: <Widget>[
           PopupMenuButton<String>(
             onSelected: choiceAction,
@@ -196,7 +196,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: new Padding(
+      body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: _buildTodoList(),
       ),
