@@ -36,12 +36,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Todo> _current;
+  List<Todo> _all;
   PersistentBottomSheetController<Null> _bottomSheet;
 
   @override
   void initState() {
     super.initState();
     _current = [];
+    _all = [];
   }
 
   void _add(String title, String description) {
@@ -52,6 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
           description: description,
           isCompleted: false);
       _current.add(todo);
+      _all.add(todo);
       _bottomSheet.close();
     });
   }
@@ -85,6 +88,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     onPressed: () {
                       _add(titleController.text, descrController.text);
+                    }),
+                FlatButton(
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(
+                          color: Colors.blue, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      _bottomSheet.close();
                     })
               ],
             )
@@ -181,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title:  Text("Flutter BottomSheet"),
+        title: Text("Flutter BottomSheet"),
         actions: <Widget>[
           PopupMenuButton<String>(
             onSelected: choiceAction,
@@ -196,6 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+          onPressed: _showConfigurationSheet, child: Icon(Icons.add)),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: _buildTodoList(),
