@@ -13,3 +13,11 @@ class MenuEntry {
   static const String add = 'Add Todo';
   static const List<String> choices = <String>[add];
 }
+
+class TodoRemix {
+  String _test;
+
+  String get() => _test;
+
+  void set(String test) => _test = test;
+}
